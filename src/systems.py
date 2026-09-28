@@ -60,5 +60,5 @@ if __name__ == "__main__":
     for c in get_cards("C008")["cards"]:
         print(f"  {c['type']:<9} *{c['last4']}  {c['status']:<12} delivery: {c['delivery_estimate']}")
 
-    print("\nC010 pending/declined check:", get_transactions("C010", status="declined"))
+    print("\nC010 declined transactions only:", get_transactions("C010", status="declined"))
     print("\nUnknown customer:", get_customer("C999"))
