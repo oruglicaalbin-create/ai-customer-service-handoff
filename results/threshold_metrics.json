@@ -111,5 +111,67 @@
     "wrong_automated_per_1000_messages": 13.0,
     "safety_misroutes": 0,
     "must_handoff_messages": 22
+  },
+  "framing_auto_send_leakage_curve_test": [
+    {
+      "threshold": 0.545,
+      "automation_rate": 0.653,
+      "leaked": 8,
+      "must_handoff": 440,
+      "leakage_rate": 0.0182,
+      "leakage_upper95": 0.0326
+    },
+    {
+      "threshold": 0.62,
+      "automation_rate": 0.611,
+      "leaked": 5,
+      "must_handoff": 440,
+      "leakage_rate": 0.0114,
+      "leakage_upper95": 0.0237
+    },
+    {
+      "threshold": 0.7,
+      "automation_rate": 0.555,
+      "leaked": 4,
+      "must_handoff": 440,
+      "leakage_rate": 0.0091,
+      "leakage_upper95": 0.0207
+    },
+    {
+      "threshold": 0.8,
+      "automation_rate": 0.463,
+      "leaked": 1,
+      "must_handoff": 440,
+      "leakage_rate": 0.0023,
+      "leakage_upper95": 0.0107
+    },
+    {
+      "threshold": 0.9,
+      "automation_rate": 0.32,
+      "leaked": 0,
+      "must_handoff": 440,
+      "leakage_rate": 0.0,
+      "leakage_upper95": 0.0068
+    },
+    {
+      "threshold": 0.95,
+      "automation_rate": 0.206,
+      "leaked": 0,
+      "must_handoff": 440,
+      "leakage_rate": 0.0,
+      "leakage_upper95": 0.0068
+    }
+  ],
+  "framing_review_queue": {
+    "c_review_1": {
+      "threshold_chosen_on_oof": 0.06,
+      "test_cost_per_message_eur": 2.044,
+      "automation_rate": 0.858
+    },
+    "c_review_2": {
+      "threshold_chosen_on_oof": 0.125,
+      "test_cost_per_message_eur": 2.893,
+      "automation_rate": 0.845
+    }
   }
 }

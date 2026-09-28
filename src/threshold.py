@@ -104,6 +104,30 @@ def out_of_fold_baseline(C=10, cache=True) -> pd.DataFrame:
     return oof
 
 
+def review_queue_cost(conf, correct, handoff_by_rule, safety, t, c_review, c2=C2, c_auto=C_AUTO):
+    """Alternative deployment: a human reviews every automated reply before it is sent.
+    Review costs c_review; a wrong draft is caught and handled by a human (c2 more)."""
+    human = handoff_by_rule | (conf < t)
+    cost = np.where(human, c2, c_review + c_auto + np.where(correct, 0.0, c2))
+    return cost.mean()
+
+
+def leakage_curve(conf, correct, handoff_by_rule, safety, thresholds):
+    """Automation rate and must-handoff leakage for each threshold (auto-send framing)."""
+    rows = []
+    for t in thresholds:
+        automated = ~(handoff_by_rule | (conf < t))
+        leaked = int((automated & safety).sum())
+        n_safety = int(safety.sum())
+        # one-sided 95% upper bound for the leakage rate (exact binomial; 0 events -> "rule of three")
+        from scipy.stats import beta
+        upper = float(beta.ppf(0.95, leaked + 1, n_safety - leaked)) if leaked < n_safety else 1.0
+        rows.append({"threshold": float(t), "automation_rate": round(float(automated.mean()), 3),
+                     "leaked": leaked, "must_handoff": n_safety,
+                     "leakage_rate": round(leaked / n_safety, 4), "leakage_upper95": round(upper, 4)})
+    return rows
+
+
 def bootstrap_llm(llm_arr, n=2000, seed=0):
     """How often does automating anything beat sending everything to a human, over resamples?"""
     rng = np.random.default_rng(seed)
@@ -178,7 +202,18 @@ def main():
             "bootstrap": bootstrap_llm(llm_arr),
         },
         "baseline_same_154": summary(*base_same, base_t),
+        "framing_auto_send_leakage_curve_test": leakage_curve(*base_test, [0.545, base_t, 0.7, 0.8, 0.9, 0.95]),
+        "framing_review_queue": {},
     }
+    for c_review in [1.0, 2.0]:
+        curve = [review_queue_cost(*oof_arr, t, c_review) for t in THRESHOLDS]
+        t_rq = float(THRESHOLDS[int(np.argmin(curve))])
+        automated = ~(base_test[2] | (base_test[0] < t_rq))
+        results["framing_review_queue"][f"c_review_{c_review:g}"] = {
+            "threshold_chosen_on_oof": t_rq,
+            "test_cost_per_message_eur": round(float(review_queue_cost(*base_test, t_rq, c_review)), 3),
+            "automation_rate": round(float(automated.mean()), 3),
+        }
     RESULTS_DIR.joinpath("threshold_metrics.json").write_text(json.dumps(results, indent=2))
     print(json.dumps(results, indent=2))
 

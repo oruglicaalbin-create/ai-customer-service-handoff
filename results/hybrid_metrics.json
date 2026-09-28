@@ -88,6 +88,45 @@
     "every_clarify_counted_as_necessary": 4.805,
     "plus_manual_overrides": 4.415
   },
+  "resolve_cost_per_attempt_eur": {
+    "as_judged": 7.115,
+    "with_manual_overrides": 5.536
+  },
+  "necessary_clarify_second_turn": {
+    "second_turn_free (original, optimistic)": 5.421,
+    "second_turn_human": 6.006,
+    "second_turn_ai (EUR 7.12 per attempt)": 6.253
+  },
+  "consistent_clarify_pricing_grid": {
+    "c_clarify=0.01": {
+      "as_judged": 5.528,
+      "manual_overrides": 5.138
+    },
+    "c_clarify=1": {
+      "as_judged": 5.766,
+      "manual_overrides": 5.376
+    },
+    "c_clarify=2": {
+      "as_judged": 6.006,
+      "manual_overrides": 5.616
+    }
+  },
+  "review_queue_measured_replies": {
+    "c_review_1": 4.655,
+    "c_review_2": 5.246
+  },
+  "artefact_check_without_C006": {
+    "threshold": 0.62,
+    "cost_per_message_eur": 4.913,
+    "sent_to_llm": 0.589,
+    "resolved_good": 28,
+    "resolved_bad": 6,
+    "clarify_good": 18,
+    "clarify_bad": 16,
+    "llm_handoff": 8,
+    "safety_misroutes": 0,
+    "fully_automated_share": 0.217
+  },
   "judge_problems_among_automated": {
     "none": 47,
     "unnecessary_question": 11,

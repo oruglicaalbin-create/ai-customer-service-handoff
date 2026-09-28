@@ -68,16 +68,82 @@ def summarise(df, t, c_clarify=C_CLARIFY):
     }
 
 
+def apply_overrides(df):
+    """Replace judge verdicts that a human reviewer disagreed with (results/judge_overrides.csv)."""
+    out = df.copy()
+    for o in pd.read_csv(RESULTS_DIR / "judge_overrides.csv").itertuples():
+        mask = (out["message"] == o.message) & (out["customer_id"] == o.customer_id)
+        out.loc[mask, "verdict"] = o.override_verdict
+    return out
+
+
+def resolve_cost_per_attempt(df, t=PRESET_THRESHOLD):
+    """Average cost of one LLM resolve attempt (good: c_auto; bad: c1 or c1_safety)."""
+    a = df[~df["rule_handoff"] & (df["confidence"] >= t) & (df["decision"] == "resolve")]
+    return float(a.apply(outcome_cost, axis=1, t=t).mean())
+
+
+def clarify_second_turn_rows(df, t=PRESET_THRESHOLD):
+    """A necessary clarify is not the end: the customer answers and the case must still be resolved.
+    Price that second turn as a human (c2) or as another AI attempt (measured resolve cost)."""
+    ai_turn = resolve_cost_per_attempt(df, t)
+    rows = {}
+    for name, extra in [("second_turn_free (original, optimistic)", 0.0),
+                        ("second_turn_human", C2),
+                        (f"second_turn_ai (EUR {ai_turn:.2f} per attempt)", ai_turn)]:
+        total = 0.0
+        for _, r in df.iterrows():
+            cost = outcome_cost(r, t)
+            if not (r["rule_handoff"] or r["confidence"] < t) and r["decision"] == "clarify" \
+                    and r["verdict"] == "good":
+                cost += extra
+            total += cost
+        rows[name] = round(total / len(df), 3)
+    return rows
+
+
+def consistent_grid(df, t=PRESET_THRESHOLD):
+    """Cost/msg with consistent clarify pricing: every clarify pays c_clarify and its second turn
+    goes to a human (c2). Rows: clarify price; columns: judge reading."""
+    readings = {"as_judged": df, "manual_overrides": apply_overrides(df)}
+    grid = {}
+    for c in [0.01, 1.0, 2.0]:
+        grid[f"c_clarify={c:g}"] = {}
+        for name, d in readings.items():
+            total = 0.0
+            for _, r in d.iterrows():
+                if r["rule_handoff"] or r["confidence"] < t:
+                    total += C2
+                elif r["decision"] == "clarify":
+                    total += c + C_AUTO + C2  # necessary or not, the second turn goes to a human
+                else:
+                    total += outcome_cost(r, t)
+            grid[f"c_clarify={c:g}"][name] = round(total / len(d), 3)
+    return grid
+
+
+def review_queue_rows(df, t=PRESET_THRESHOLD):
+    """Agent-assist framing: a human reviews every automated draft (c_review). Only a draft judged
+    good is sent as is; anything else (bad answer, any clarify, LLM handoff) then goes to a human."""
+    rows = {}
+    for c_review in [1.0, 2.0]:
+        total = 0.0
+        for _, r in df.iterrows():
+            if r["rule_handoff"] or r["confidence"] < t:
+                total += C2
+            else:
+                ok = r["decision"] == "resolve" and r["verdict"] == "good"
+                total += c_review + C_AUTO + (0 if ok else C2)
+        rows[f"c_review_{c_review:g}"] = round(total / len(df), 3)
+    return rows
+
+
 def judge_sensitivity(df):
     """Does the conclusion depend on the judge? Recompute under more lenient readings.
     Manual overrides (results/judge_overrides.csv) are verdicts a human reviewer disagreed with."""
     lenient_clarify = df.copy()
     lenient_clarify.loc[lenient_clarify["decision"] == "clarify", "verdict"] = "good"
-    overrides = pd.read_csv(RESULTS_DIR / "judge_overrides.csv")
-    with_overrides = lenient_clarify.copy()
-    for o in overrides.itertuples():
-        mask = (with_overrides["message"] == o.message) & (with_overrides["customer_id"] == o.customer_id)
-        with_overrides.loc[mask, "verdict"] = o.override_verdict
+    with_overrides = apply_overrides(lenient_clarify)
     return {name: summarise(d, PRESET_THRESHOLD)["cost_per_message_eur"]
             for name, d in [("as_judged", df), ("every_clarify_counted_as_necessary", lenient_clarify),
                             ("plus_manual_overrides", with_overrides)]}
@@ -132,6 +198,14 @@ def main():
         "c_clarify_sensitivity": {f"c_clarify={c}": summarise(df, PRESET_THRESHOLD, c)["cost_per_message_eur"]
                                   for c in [0.5, 1, 2, 5]},
         "judge_strictness_sensitivity": judge_sensitivity(df),
+        "resolve_cost_per_attempt_eur": {
+            "as_judged": round(resolve_cost_per_attempt(df), 3),
+            "with_manual_overrides": round(resolve_cost_per_attempt(apply_overrides(df)), 3)},
+        "necessary_clarify_second_turn": clarify_second_turn_rows(df),
+        "consistent_clarify_pricing_grid": consistent_grid(df),
+        "review_queue_measured_replies": review_queue_rows(df),
+        "artefact_check_without_C006": summarise(df[df["customer_id"] != "C006"].reset_index(drop=True),
+                                                 PRESET_THRESHOLD),
         "judge_problems_among_automated": auto["problem"].value_counts().to_dict(),
         "screens_among_automated": {"replies_with_bad_numbers": int(auto["bad_numbers"].map(len).gt(0).sum()),
                                     "replies_with_invented_paths": int(auto["bad_paths"].map(len).gt(0).sum())},
