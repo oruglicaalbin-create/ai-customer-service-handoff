@@ -20,3 +20,9 @@ data/raw/
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- LaTeX build byproducts ---
+report/*.aux
+report/*.log
+report/*.toc
+report/*.out
