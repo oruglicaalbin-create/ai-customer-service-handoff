@@ -5,17 +5,16 @@ Run: python src/evaluate.py            (uses results/agent_test_2_per_intent.csv
 Output: printed report + results/evaluation_metrics.json
 """
 import json
-import re
 import sys
 from pathlib import Path
 
 import pandas as pd
 
+from grounding import ungrounded_numbers, ungrounded_paths
 from policy import must_handoff
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
-DATA_DIR = ROOT / "data"
 
 k = sys.argv[1] if len(sys.argv) > 1 else "2"
 agent = pd.read_csv(RESULTS_DIR / f"agent_test_{k}_per_intent.csv")
@@ -74,41 +73,23 @@ print(f"   Must-handoff messages (by true intent): {len(must)}; handed off {reac
 for _, r in not_handed_off.iterrows():
     print(f"     ! '{r['message']}'  true={r['true_intent']} pred={r['intent']} decision={r['decision']}")
 
-# --- 4. Grounding check: numbers in replies must come from facts or data ----
-def numbers(text: str) -> set[str]:
-    """All numbers in a text, normalised: '10,000' and '10 000' -> '10000', '129,90' -> '129.9'."""
-    found = re.findall(r"\d{1,3}(?:[, ]\d{3})+(?![\d,.])|\d+(?:[.,]\d+)?", str(text))
-    normalised = set()
-    for x in found:
-        if re.fullmatch(r"\d{1,3}(?:[, ]\d{3})+", x):
-            x = x.replace(",", "").replace(" ", "")  # thousands separators
-        normalised.add(str(float(x.replace(",", "."))).rstrip("0").rstrip("."))
-    return normalised
-
-
-facts_numbers = numbers((DATA_DIR / "bank_facts.md").read_text(encoding="utf-8"))
-customers = json.loads((DATA_DIR / "customers.json").read_text(encoding="utf-8"))
-cards = json.loads((DATA_DIR / "cards.json").read_text(encoding="utf-8"))
-transactions = pd.read_csv(DATA_DIR / "transactions.csv")
-
-
-def customer_numbers(cid: str) -> set[str]:
-    data = [c for c in customers if c["customer_id"] == cid] + [c for c in cards if c["customer_id"] == cid]
-    tx = transactions[transactions["customer_id"] == cid]
-    text = json.dumps(data) + tx.to_csv(index=False)
-    return numbers(text) | {n.lstrip("-") for n in numbers(text)}
-
-
-ungrounded = []
+# --- 4. Grounding screens: numbers and app menu paths ----------------------
+# (screens only: they cannot see invented procedures written in plain words)
+ungrounded, invented_paths = [], []
 for _, r in both.iterrows():
-    allowed = facts_numbers | customer_numbers(r["customer_id"]) | numbers(r["message"])
-    extra = numbers(r["customer_reply"]) - allowed
+    extra = ungrounded_numbers(r["customer_reply"], r["message"], r["customer_id"])
     if extra:
-        ungrounded.append((r["message"], r["customer_id"], sorted(extra), r["customer_reply"]))
-print(f"\n=== 4. Grounding: replies containing numbers not found in facts or customer data: "
-      f"{len(ungrounded)}/{n} ===")
+        ungrounded.append((r["message"], r["customer_id"], extra, r["customer_reply"]))
+    paths = ungrounded_paths(r["customer_reply"])
+    if paths:
+        invented_paths.append((r["message"], r["decision"], paths))
+print(f"\n=== 4. Grounding screens ===")
+print(f"  replies with numbers not found in facts, customer data or message: {len(ungrounded)}/{n}")
 for message, cid, extra, reply in ungrounded:
-    print(f"  [{cid}] {message}\n     unknown numbers {extra}: {reply[:160]}")
+    print(f"    [{cid}] {message}\n       unknown numbers {extra}: {reply[:160]}")
+print(f"  replies with app menu paths not in the fact sheet: {len(invented_paths)}/{n}")
+for message, decision, paths in invented_paths:
+    print(f"    {paths} ({decision}) <- '{message}'")
 
 # --- 5. Most common LLM confusions -----------------------------------------
 wrong = both[~both["correct_llm"]]
@@ -127,5 +108,7 @@ metrics = {
     "must_handoff_messages": len(must),
     "must_handoff_reached_human": round(reached_human, 4),
     "replies_with_ungrounded_numbers": len(ungrounded),
+    "replies_with_invented_app_paths": len(invented_paths),
+    "invented_app_paths_in_resolve_decisions": sum(d == "resolve" for _, d, _ in invented_paths),
 }
 (RESULTS_DIR / "evaluation_metrics.json").write_text(json.dumps(metrics, indent=2))

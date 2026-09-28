@@ -1,0 +1,23 @@
+{
+  "C=1": {
+    "oof_accuracy": 0.8435,
+    "mean_confidence": 0.3504,
+    "confidence_minus_accuracy": -0.4932,
+    "ece": 0.4932,
+    "cost_optimal_threshold": 0.39
+  },
+  "C=10": {
+    "oof_accuracy": 0.8787,
+    "mean_confidence": 0.6935,
+    "confidence_minus_accuracy": -0.1853,
+    "ece": 0.1853,
+    "cost_optimal_threshold": 0.62
+  },
+  "C=100": {
+    "oof_accuracy": 0.8778,
+    "mean_confidence": 0.8304,
+    "confidence_minus_accuracy": -0.0475,
+    "ece": 0.0475,
+    "cost_optimal_threshold": 0.875
+  }
+}

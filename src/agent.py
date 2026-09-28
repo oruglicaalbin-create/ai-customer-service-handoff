@@ -144,6 +144,61 @@ PROMPT_VERSION = hashlib.sha256(
     json.dumps([MODEL, SYSTEM_PROMPT, TOOLS, OUTPUT_SCHEMA], sort_keys=True).encode()
 ).hexdigest()[:12]
 
+# The simulated systems' data. Each cached result records the version it was made
+# with; a result made with different data is treated as stale and recomputed.
+DATA_VERSION = hashlib.sha256(b"".join(
+    (Path(__file__).resolve().parent.parent / "data" / f).read_bytes()
+    for f in ["customers.json", "cards.json", "transactions.csv"]
+)).hexdigest()[:12]
+
+# --- Hybrid mode: the classifier supplies the intent, the LLM gathers data and replies.
+# The rules are the frozen prompt's rules word for word; only the intent part differs.
+HYBRID_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "reason": {"type": "string"},
+        "decision": {"type": "string", "enum": ["resolve", "clarify", "handoff"]},
+        "customer_reply": {"type": "string"},
+        "handoff_summary": {"type": "string"},
+    },
+    "required": ["reason", "decision", "customer_reply", "handoff_summary"],
+    "additionalProperties": False,
+}
+
+HYBRID_SYSTEM_PROMPT = f"""You are a customer-service assistant at ExampleBank. The customer is logged in \
+to the bank's app, so you can look up their data with the tools.
+
+The bank's intent classifier has already identified what the message is about; it is given before the \
+message. Treat it as the topic of the message and do not re-classify it.
+
+For each message:
+1. Gather: call tools when the customer's data could help. Don't call tools you don't need.
+2. Decide one of:
+   - resolve: you can answer from the bank facts below and the customer's data.
+   - clarify: the message itself lacks information you need to answer; ask ONE specific question.
+   - handoff: a human must take over. Hand off if the data shows a problem you cannot fix.
+   The systems may not yet show very recent events. If the customer describes something the data doesn't \
+show, answer from the bank facts instead of questioning the customer about it.
+
+Only state numbers, fees, limits, times or app steps that appear in the bank facts or the tool results. \
+If the answer needs anything else, say a colleague will confirm it.
+
+<bank_facts>
+{BANK_FACTS}
+</bank_facts>
+
+Final answer fields:
+- reason: one sentence on how you chose the decision.
+- decision: resolve, clarify or handoff.
+- customer_reply: the message to the customer (the answer, the question, or that a colleague will take over). \
+Always write it in the same language as the customer's message. Be brief and friendly.
+- handoff_summary: for handoff, 1-3 sentences for the human agent with the key facts; otherwise empty string."""
+
+HYBRID_VERSION = hashlib.sha256(
+    json.dumps([MODEL, HYBRID_SYSTEM_PROMPT, TOOLS, HYBRID_OUTPUT_SCHEMA], sort_keys=True).encode()
+).hexdigest()[:12]
+HYBRID_CACHE_DIR = CACHE_DIR.parent / "hybrid"
+
 _client = None
 
 
@@ -154,7 +209,8 @@ def _get_client() -> anthropic.Anthropic:
     return _client
 
 
-def _call_claude(message: str, customer_id: str) -> dict:
+def _call_claude(message: str, customer_id: str, system: str = SYSTEM_PROMPT,
+                 schema: dict = OUTPUT_SCHEMA) -> dict:
     """Run the tool-use loop for one message. Returns the raw LLM result + usage."""
     messages = [{"role": "user", "content": message}]
     tools_called = []
@@ -167,9 +223,9 @@ def _call_claude(message: str, customer_id: str) -> dict:
             # temperature 0 = as deterministic as possible, for reproducible evaluation.
             # SDK 1.x dropped the keyword; Haiku 4.5 still accepts it via extra_body.
             extra_body={"temperature": 0},
-            system=SYSTEM_PROMPT,
+            system=system,
             tools=TOOLS,
-            output_config={"format": {"type": "json_schema", "schema": OUTPUT_SCHEMA}},
+            output_config={"format": {"type": "json_schema", "schema": schema}},
             messages=messages,
         )
         tokens["input"] += response.usage.input_tokens
@@ -206,17 +262,73 @@ def _cache_file(message: str, customer_id: str) -> Path:
     return CACHE_DIR / f"{key}.json"
 
 
+def _read_cache(cache_file: Path) -> dict | None:
+    """A cached result, or None if missing or made with different customer data."""
+    if not cache_file.exists():
+        return None
+    result = json.loads(cache_file.read_text(encoding="utf-8"))
+    if result.get("data_version") != DATA_VERSION:
+        return None  # stale: the simulated systems' data changed since this was computed
+    result["from_cache"] = True  # cost_usd is what it cost originally; nothing paid now
+    return result
+
+
 def is_cached(message: str, customer_id: str) -> bool:
-    return _cache_file(message, customer_id).exists()
+    return _read_cache(_cache_file(message, customer_id)) is not None
+
+
+def _usage_fields(raw: dict) -> dict:
+    tokens = raw["tokens"]
+    return {
+        "tools_called": raw["tools_called"],
+        "input_tokens": tokens["input"],
+        "output_tokens": tokens["output"],
+        "cost_usd": round(tokens["input"] * PRICE_PER_TOKEN_USD["input"]
+                          + tokens["output"] * PRICE_PER_TOKEN_USD["output"], 6),
+        "model": MODEL,
+        "data_version": DATA_VERSION,
+        "from_cache": False,
+    }
+
+
+def _hybrid_cache_file(message: str, customer_id: str, intent: str) -> Path:
+    key = hashlib.sha256(f"{HYBRID_VERSION}|{customer_id}|{intent}|{message}".encode()).hexdigest()[:20]
+    return HYBRID_CACHE_DIR / f"{key}.json"
+
+
+def is_cached_hybrid(message: str, customer_id: str, intent: str) -> bool:
+    return _read_cache(_hybrid_cache_file(message, customer_id, intent)) is not None
+
+
+def handle_message_with_intent(message: str, customer_id: str, intent: str) -> dict:
+    """Hybrid mode: the classifier's intent is given; the LLM gathers data and writes the reply."""
+    cache_file = _hybrid_cache_file(message, customer_id, intent)
+    cached = _read_cache(cache_file)
+    if cached is not None:
+        return cached
+
+    raw = _call_claude(f"Classifier intent: {intent}\n\nCustomer message:\n{message}", customer_id,
+                       system=HYBRID_SYSTEM_PROMPT, schema=HYBRID_OUTPUT_SCHEMA)
+    llm = raw["llm"]
+    if llm is None:  # safe default: a human takes over
+        result = {"decision": "handoff", "decision_source": "error: " + raw["error"],
+                  "customer_reply": "", "handoff_summary": "", "reason": ""}
+    else:
+        result = {**llm, "decision_source": "llm"}
+    result.update({"message": message, "customer_id": customer_id, "given_intent": intent,
+                   "prompt_version": HYBRID_VERSION, **_usage_fields(raw)})
+    if llm is not None:  # don't cache failures, so they are retried next time
+        HYBRID_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+    return result
 
 
 def handle_message(message: str, customer_id: str) -> dict:
     """Full pipeline for one message, with disk cache and business rules applied."""
     cache_file = _cache_file(message, customer_id)
-    if cache_file.exists():
-        result = json.loads(cache_file.read_text(encoding="utf-8"))
-        result["from_cache"] = True  # cost_usd is what it cost originally; nothing paid now
-        return result
+    cached = _read_cache(cache_file)
+    if cached is not None:
+        return cached
 
     raw = _call_claude(message, customer_id)
     llm = raw["llm"]
@@ -241,19 +353,8 @@ def handle_message(message: str, customer_id: str) -> dict:
             "reason": llm["reason"],
         }
 
-    tokens = raw["tokens"]
-    result.update({
-        "message": message,
-        "customer_id": customer_id,
-        "tools_called": raw["tools_called"],
-        "input_tokens": tokens["input"],
-        "output_tokens": tokens["output"],
-        "cost_usd": round(tokens["input"] * PRICE_PER_TOKEN_USD["input"]
-                          + tokens["output"] * PRICE_PER_TOKEN_USD["output"], 6),
-        "model": MODEL,
-        "prompt_version": PROMPT_VERSION,
-        "from_cache": False,
-    })
+    result.update({"message": message, "customer_id": customer_id,
+                   "prompt_version": PROMPT_VERSION, **_usage_fields(raw)})
 
     if llm is not None:  # don't cache failures, so they are retried next time
         CACHE_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,3 @@
+message,customer_id,override_verdict,reason
+what is the top up limit,C006,good,Correct answer from the fact sheet; judged bad only because the randomly assigned customer has a restricted account (simulation artefact)
+What locations can I top up with cash?,C006,good,Correct answer from the fact sheet; judged bad only because the randomly assigned customer has a restricted account (simulation artefact)

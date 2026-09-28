@@ -1,25 +1,78 @@
 {
   "assumptions": {
     "c1_wrong_automated_eur": 30.0,
+    "c1_safety_misroute_eur": 300.0,
     "c2_human_eur": 5.0,
     "c_auto_eur": 0.01,
-    "theoretical_threshold": 0.833
+    "theoretical_threshold": 0.8337,
+    "note": "routing value only: assumes a correct intent always gets a correct reply (upper bound); averaged over a benchmark with 40 messages per intent"
   },
   "all_to_human_cost_per_message_eur": 5.0,
   "baseline_full_test_3080": {
     "chosen_on_train_out_of_fold": {
+      "threshold": 0.62,
+      "cost_per_message_eur": 2.826,
+      "automation_rate": 0.611,
+      "error_rate_of_automated": 0.024,
+      "wrong_automated_per_1000_messages": 14.6,
+      "safety_misroutes": 5,
+      "must_handoff_messages": 440
+    },
+    "earlier_model_without_safety_cost": {
+      "threshold": 0.545,
+      "cost_per_message_eur": 3.094,
+      "automation_rate": 0.653,
+      "error_rate_of_automated": 0.033,
+      "wrong_automated_per_1000_messages": 21.8,
+      "safety_misroutes": 8,
+      "must_handoff_messages": 440
+    },
+    "at_theoretical_threshold": {
+      "threshold": 0.8336666666666667,
+      "cost_per_message_eur": 3.081,
+      "automation_rate": 0.426,
+      "error_rate_of_automated": 0.009,
+      "wrong_automated_per_1000_messages": 3.9,
+      "safety_misroutes": 1,
+      "must_handoff_messages": 440
+    }
+  },
+  "baseline_threshold_by_safety_cost": {
+    "c1_safety_30": {
       "threshold": 0.545,
       "cost_per_message_eur": 2.393,
       "automation_rate": 0.653,
       "error_rate_of_automated": 0.033,
-      "wrong_automated_per_1000_messages": 21.8
+      "wrong_automated_per_1000_messages": 21.8,
+      "safety_misroutes": 8,
+      "must_handoff_messages": 440
     },
-    "at_theoretical_threshold": {
-      "threshold": 0.8333333333333334,
-      "cost_per_message_eur": 2.991,
-      "automation_rate": 0.426,
-      "error_rate_of_automated": 0.009,
-      "wrong_automated_per_1000_messages": 3.9
+    "c1_safety_100": {
+      "threshold": 0.55,
+      "cost_per_message_eur": 2.56,
+      "automation_rate": 0.65,
+      "error_rate_of_automated": 0.032,
+      "wrong_automated_per_1000_messages": 20.8,
+      "safety_misroutes": 8,
+      "must_handoff_messages": 440
+    },
+    "c1_safety_300": {
+      "threshold": 0.62,
+      "cost_per_message_eur": 2.826,
+      "automation_rate": 0.611,
+      "error_rate_of_automated": 0.024,
+      "wrong_automated_per_1000_messages": 14.6,
+      "safety_misroutes": 5,
+      "must_handoff_messages": 440
+    },
+    "c1_safety_1000": {
+      "threshold": 0.69,
+      "cost_per_message_eur": 3.785,
+      "automation_rate": 0.562,
+      "error_rate_of_automated": 0.02,
+      "wrong_automated_per_1000_messages": 11.0,
+      "safety_misroutes": 4,
+      "must_handoff_messages": 440
     }
   },
   "llm_test_154_in_sample": {
@@ -28,21 +81,35 @@
       "cost_per_message_eur": 5.0,
       "automation_rate": 0.0,
       "error_rate_of_automated": null,
-      "wrong_automated_per_1000_messages": 0.0
+      "wrong_automated_per_1000_messages": 0.0,
+      "safety_misroutes": 0,
+      "must_handoff_messages": 22
     },
     "at_theoretical_threshold": {
-      "threshold": 0.8333333333333334,
+      "threshold": 0.8336666666666667,
       "cost_per_message_eur": 5.297,
       "automation_rate": 0.526,
       "error_rate_of_automated": 0.185,
-      "wrong_automated_per_1000_messages": 97.4
+      "wrong_automated_per_1000_messages": 97.4,
+      "safety_misroutes": 0,
+      "must_handoff_messages": 22
+    },
+    "bootstrap": {
+      "share_of_resamples_where_automation_pays": 0.51,
+      "best_saving_median_eur": 0.029,
+      "best_saving_90pct_range_eur": [
+        0.0,
+        0.904
+      ]
     }
   },
   "baseline_same_154": {
-    "threshold": 0.545,
-    "cost_per_message_eur": 2.377,
-    "automation_rate": 0.643,
-    "error_rate_of_automated": 0.03,
-    "wrong_automated_per_1000_messages": 19.5
+    "threshold": 0.62,
+    "cost_per_message_eur": 2.441,
+    "automation_rate": 0.591,
+    "error_rate_of_automated": 0.022,
+    "wrong_automated_per_1000_messages": 13.0,
+    "safety_misroutes": 0,
+    "must_handoff_messages": 22
   }
 }

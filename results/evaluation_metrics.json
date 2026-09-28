@@ -13,5 +13,7 @@
   "policy_overrides": 5,
   "must_handoff_messages": 22,
   "must_handoff_reached_human": 0.9091,
-  "replies_with_ungrounded_numbers": 0
+  "replies_with_ungrounded_numbers": 0,
+  "replies_with_invented_app_paths": 7,
+  "invented_app_paths_in_resolve_decisions": 7
 }

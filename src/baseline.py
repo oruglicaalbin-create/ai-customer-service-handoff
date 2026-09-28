@@ -23,14 +23,14 @@ from load_data import load_banking77
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
 
-def make_model():
+def make_model(C=10):
     """TF-IDF turns each message into a vector of word and word-pair weights:
     words frequent in this message but rare overall get high weight.
     Logistic regression then learns one weight vector per intent and outputs
     a probability for each of the 77 intents."""
     return make_pipeline(
         TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True),
-        LogisticRegression(C=10, max_iter=2000),
+        LogisticRegression(C=C, max_iter=2000),
     )
 
 

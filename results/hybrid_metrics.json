@@ -1,0 +1,103 @@
+{
+  "assumptions": {
+    "c1": 30.0,
+    "c1_safety": 300.0,
+    "c2": 5.0,
+    "c_auto": 0.01,
+    "c_clarify": 2.0
+  },
+  "preset_threshold": {
+    "threshold": 0.62,
+    "cost_per_message_eur": 5.421,
+    "sent_to_llm": 0.591,
+    "resolved_good": 29,
+    "resolved_bad": 9,
+    "clarify_good": 18,
+    "clarify_bad": 19,
+    "llm_handoff": 16,
+    "safety_misroutes": 0,
+    "fully_automated_share": 0.188
+  },
+  "routing_only_upper_bound_same_154": {
+    "threshold": 0.62,
+    "cost_per_message_eur": 2.441,
+    "automation_rate": 0.591,
+    "error_rate_of_automated": 0.022,
+    "wrong_automated_per_1000_messages": 13.0,
+    "safety_misroutes": 0,
+    "must_handoff_messages": 22
+  },
+  "other_thresholds": {
+    "t=0.545": {
+      "threshold": 0.545,
+      "cost_per_message_eur": 5.377,
+      "sent_to_llm": 0.643,
+      "resolved_good": 32,
+      "resolved_bad": 9,
+      "clarify_good": 18,
+      "clarify_bad": 23,
+      "llm_handoff": 17,
+      "safety_misroutes": 0,
+      "fully_automated_share": 0.208
+    },
+    "t=0.7": {
+      "threshold": 0.7,
+      "cost_per_message_eur": 5.415,
+      "sent_to_llm": 0.565,
+      "resolved_good": 29,
+      "resolved_bad": 9,
+      "clarify_good": 17,
+      "clarify_bad": 17,
+      "llm_handoff": 15,
+      "safety_misroutes": 0,
+      "fully_automated_share": 0.188
+    },
+    "t=0.8": {
+      "threshold": 0.8,
+      "cost_per_message_eur": 5.349,
+      "sent_to_llm": 0.481,
+      "resolved_good": 24,
+      "resolved_bad": 8,
+      "clarify_good": 17,
+      "clarify_bad": 12,
+      "llm_handoff": 13,
+      "safety_misroutes": 0,
+      "fully_automated_share": 0.156
+    },
+    "t=0.9": {
+      "threshold": 0.9,
+      "cost_per_message_eur": 5.088,
+      "sent_to_llm": 0.318,
+      "resolved_good": 16,
+      "resolved_bad": 5,
+      "clarify_good": 14,
+      "clarify_bad": 5,
+      "llm_handoff": 9,
+      "safety_misroutes": 0,
+      "fully_automated_share": 0.104
+    }
+  },
+  "c_clarify_sensitivity": {
+    "c_clarify=0.5": 5.061,
+    "c_clarify=1": 5.181,
+    "c_clarify=2": 5.421,
+    "c_clarify=5": 6.142
+  },
+  "judge_strictness_sensitivity": {
+    "as_judged": 5.421,
+    "every_clarify_counted_as_necessary": 4.805,
+    "plus_manual_overrides": 4.415
+  },
+  "judge_problems_among_automated": {
+    "none": 47,
+    "unnecessary_question": 11,
+    "missed_escalation": 8,
+    "unsupported_fact": 6,
+    "unhelpful": 2,
+    "wrong_topic": 1
+  },
+  "screens_among_automated": {
+    "replies_with_bad_numbers": 0,
+    "replies_with_invented_paths": 0
+  }
+}
