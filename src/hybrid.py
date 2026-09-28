@@ -17,7 +17,8 @@ Cost of each outcome (€, assumptions in the constants below):
 The threshold 0.62 was fixed beforehand on out-of-fold training data (src/threshold.py),
 so it is not tuned on these messages. Other thresholds are shown for context.
 
-Usage: python src/hybrid.py      (asks before spending; cached results are free)
+Usage: python src/hybrid.py            (asks before spending; cached results are free)
+       python src/hybrid.py analyse    (recompute all figures from results/hybrid_154.csv; no API, no cache)
 Output: results/hybrid_154.csv, results/hybrid_metrics.json
 """
 import json
@@ -186,7 +187,28 @@ def main():
     llm_cols = pd.DataFrame.from_dict(rows, orient="index")
     df = df.join(llm_cols)
     df.to_csv(RESULTS_DIR / "hybrid_154.csv", index=False)
+    compute_metrics(df)
 
+
+def consistent_bootstrap(df, t=PRESET_THRESHOLD, n=5000, seed=0):
+    """95% bootstrap intervals for the consistently priced hybrid cost (second turn of a clarify -> human)."""
+    rng = np.random.default_rng(seed)
+    out = {}
+    for name, d in [("as_judged", df), ("manual_overrides", apply_overrides(df))]:
+        for c in [0.01, 2.0]:
+            per_msg = np.array([C2 if (r.rule_handoff or r.confidence < t)
+                                else c + C_AUTO + C2 if r.decision == "clarify"
+                                else outcome_cost(pd.Series(r._asdict()), t)
+                                for r in d.itertuples()])
+            boots = [per_msg[rng.integers(0, len(per_msg), len(per_msg))].mean() for _ in range(n)]
+            lo, hi = np.percentile(boots, [2.5, 97.5])
+            out[f"{name}, c_clarify={c:g}"] = {"mean": round(float(per_msg.mean()), 3),
+                                               "ci95": [round(float(lo), 2), round(float(hi), 2)]}
+    return out
+
+
+def compute_metrics(df):
+    """All hybrid cost figures from the per-message results (no API calls)."""
     from threshold import arrays, summary as routing_summary
     routing = arrays(df, "confidence", "predicted_intent", "correct")
     auto = df[~df["rule_handoff"] & (df["confidence"] >= PRESET_THRESHOLD)]
@@ -203,6 +225,7 @@ def main():
             "with_manual_overrides": round(resolve_cost_per_attempt(apply_overrides(df)), 3)},
         "necessary_clarify_second_turn": clarify_second_turn_rows(df),
         "consistent_clarify_pricing_grid": consistent_grid(df),
+        "consistent_pricing_bootstrap": consistent_bootstrap(df),
         "review_queue_measured_replies": review_queue_rows(df),
         "artefact_check_without_C006": summarise(df[df["customer_id"] != "C006"].reset_index(drop=True),
                                                  PRESET_THRESHOLD),
@@ -214,5 +237,17 @@ def main():
     print(json.dumps(metrics, indent=2))
 
 
+def analyse_saved():
+    """Recompute every figure from the committed results/hybrid_154.csv, with no API calls or cache."""
+    import ast
+    df = pd.read_csv(RESULTS_DIR / "hybrid_154.csv")
+    for col in ["bad_numbers", "bad_paths"]:
+        df[col] = df[col].map(lambda v: ast.literal_eval(v) if isinstance(v, str) else [])
+    compute_metrics(df)
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "analyse":
+        analyse_saved()
+    else:
+        main()
