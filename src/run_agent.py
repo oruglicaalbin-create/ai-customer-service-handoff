@@ -21,7 +21,7 @@ from load_data import load_banking77
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 CUSTOMER_IDS = [f"C{i:03d}" for i in range(1, 11)]
-EST_COST_PER_MESSAGE_USD = 0.0075  # measured average from the demo runs
+EST_COST_PER_MESSAGE_USD = 0.0085  # demo average + fact sheet, rounded up
 SEED = 42
 
 

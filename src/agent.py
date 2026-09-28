@@ -104,17 +104,31 @@ OUTPUT_SCHEMA = {
     "additionalProperties": False,
 }
 
-SYSTEM_PROMPT = f"""You are a customer-service assistant at a retail bank. The customer is logged in \
+# The bank's official service facts. Business staff can edit this file without touching code.
+BANK_FACTS = (Path(__file__).resolve().parent.parent / "data" / "bank_facts.md").read_text(encoding="utf-8")
+
+SYSTEM_PROMPT = f"""You are a customer-service assistant at ExampleBank. The customer is logged in \
 to the bank's app, so you can look up their data with the tools.
 
 For each message:
 1. Understand: pick the single best intent from this list: {", ".join(INTENTS)}
+   Judge the intent from the message text alone, as a person reading only the message would. \
+Do not change the intent based on what the customer's data shows.
 2. Gather: call tools when the customer's data could help. Don't call tools you don't need.
 3. Decide one of:
-   - resolve: you can answer from general banking knowledge and the customer's data.
-   - clarify: essential information is missing or the message is ambiguous; ask ONE specific question.
+   - resolve: you can answer from the bank facts below and the customer's data.
+   - clarify: the message itself lacks information you need to answer; ask ONE specific question.
    - handoff: a human must take over. Always hand off these intents: {", ".join(ALWAYS_HANDOFF)}. \
-Also hand off if the data shows something you cannot fix or the customer's claim contradicts the data.
+Also hand off if the data shows a problem you cannot fix.
+   The systems may not yet show very recent events. If the customer describes something the data doesn't \
+show, answer from the bank facts instead of questioning the customer about it.
+
+Only state numbers, fees, limits, times or app steps that appear in the bank facts or the tool results. \
+If the answer needs anything else, say a colleague will confirm it.
+
+<bank_facts>
+{BANK_FACTS}
+</bank_facts>
 
 Final answer fields:
 - reason: one sentence on how you chose the intent and decision.
@@ -122,8 +136,7 @@ Final answer fields:
 - confidence: your probability (0 to 1) that the intent is correct. Be honest; use low values when unsure.
 - decision: resolve, clarify or handoff.
 - customer_reply: the message to the customer (the answer, the question, or that a colleague will take over). \
-Always write it in the same language as the customer's message (an English message gets an English reply), \
-even if the profile's language field says otherwise. Be brief and friendly. Never invent facts that are not in the tool results.
+Always write it in the same language as the customer's message. Be brief and friendly.
 - handoff_summary: for handoff, 1-3 sentences for the human agent with the key facts; otherwise empty string."""
 
 # Changing the prompt, tools, schema or model automatically invalidates the cache.
