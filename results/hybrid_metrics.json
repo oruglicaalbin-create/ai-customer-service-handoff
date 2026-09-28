@@ -111,6 +111,36 @@
       "manual_overrides": 5.616
     }
   },
+  "consistent_pricing_bootstrap": {
+    "as_judged, c_clarify=0.01": {
+      "mean": 5.528,
+      "ci95": [
+        4.55,
+        6.6
+      ]
+    },
+    "as_judged, c_clarify=2": {
+      "mean": 6.006,
+      "ci95": [
+        5.02,
+        7.12
+      ]
+    },
+    "manual_overrides, c_clarify=0.01": {
+      "mean": 5.138,
+      "ci95": [
+        4.26,
+        6.11
+      ]
+    },
+    "manual_overrides, c_clarify=2": {
+      "mean": 5.616,
+      "ci95": [
+        4.74,
+        6.65
+      ]
+    }
+  },
   "review_queue_measured_replies": {
     "c_review_1": 4.655,
     "c_review_2": 5.246
