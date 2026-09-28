@@ -1,0 +1,6 @@
+# Exact versions tested with Python 3.14.
+anthropic==1.8.0        # Claude API client (LLM + tool use)
+python-dotenv==1.2.3    # loads the API key from .env
+pandas==3.0.6           # tables / data handling
+scikit-learn==1.9.1     # baseline classifier (TF-IDF + logistic regression)
+matplotlib==3.11.2      # plots (cost curve, sensitivity)

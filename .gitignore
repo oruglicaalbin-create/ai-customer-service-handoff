@@ -1,0 +1,22 @@
+# --- Secrets: never commit these ---
+.env
+bank-cs-assistant.txt
+
+# --- Python virtual environment (recreate with: pip install -r requirements.txt) ---
+.venv/
+
+# --- Python byproducts ---
+__pycache__/
+*.pyc
+
+# --- Cached API responses (regenerable, may be large) ---
+cache/
+
+# --- Downloaded raw datasets (re-downloadable) ---
+data/raw/
+
+# --- Editor / OS clutter ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
