@@ -12,6 +12,14 @@ copy .env.example .env      # then put your Anthropic API key in .env
 python src/check_setup.py
 ```
 
+## Data
+
+- **BANKING77** by PolyAI (Casanueva et al., 2020, "Efficient Intent Detection with Dual Sentence
+  Encoders"), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). 13,083 banking
+  customer queries labelled with 77 intents. Downloaded automatically from
+  [PolyAI-LDN/task-specific-datasets](https://github.com/PolyAI-LDN/task-specific-datasets) by
+  `src/load_data.py`; not redistributed in this repo.
+
 ## Folder layout
 
 | Folder     | Contents                                                        |
