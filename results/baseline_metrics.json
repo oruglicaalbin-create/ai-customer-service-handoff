@@ -1,0 +1,9 @@
+{
+  "model": "TF-IDF (1-2 grams) + logistic regression (C=10)",
+  "train_messages": 10003,
+  "test_messages": 3080,
+  "accuracy": 0.8938,
+  "macro_f1": 0.8942,
+  "train_seconds": 12.3,
+  "predict_ms_per_message": 0.016
+}
