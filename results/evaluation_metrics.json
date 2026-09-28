@@ -1,0 +1,17 @@
+{
+  "messages": 154,
+  "llm_accuracy": 0.7013,
+  "baseline_accuracy_same_messages": 0.8766,
+  "baseline_accuracy_full_test": 0.8938,
+  "llm_cost_per_message_usd": 0.00836,
+  "llm_total_cost_usd": 1.2874,
+  "decisions": {
+    "clarify": 66,
+    "resolve": 53,
+    "handoff": 35
+  },
+  "policy_overrides": 5,
+  "must_handoff_messages": 22,
+  "must_handoff_reached_human": 0.9091,
+  "replies_with_ungrounded_numbers": 0
+}
