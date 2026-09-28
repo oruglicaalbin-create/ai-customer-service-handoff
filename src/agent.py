@@ -188,10 +188,18 @@ def _call_claude(message: str, customer_id: str) -> dict:
     return {"llm": None, "error": "too many tool rounds", "tools_called": tools_called, "tokens": tokens}
 
 
+def _cache_file(message: str, customer_id: str) -> Path:
+    key = hashlib.sha256(f"{PROMPT_VERSION}|{customer_id}|{message}".encode()).hexdigest()[:20]
+    return CACHE_DIR / f"{key}.json"
+
+
+def is_cached(message: str, customer_id: str) -> bool:
+    return _cache_file(message, customer_id).exists()
+
+
 def handle_message(message: str, customer_id: str) -> dict:
     """Full pipeline for one message, with disk cache and business rules applied."""
-    key = hashlib.sha256(f"{PROMPT_VERSION}|{customer_id}|{message}".encode()).hexdigest()[:20]
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file(message, customer_id)
     if cache_file.exists():
         result = json.loads(cache_file.read_text(encoding="utf-8"))
         result["from_cache"] = True  # cost_usd is what it cost originally; nothing paid now
