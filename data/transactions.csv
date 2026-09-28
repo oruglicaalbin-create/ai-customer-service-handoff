@@ -1,0 +1,29 @@
+transaction_id,customer_id,date,type,description,amount_eur,fee_eur,status
+T0001,C001,2026-09-22,card_payment,K-Market Kamppi,-23.40,0.00,completed
+T0002,C001,2026-09-24,transfer_in,Salary Acme Oy,2150.00,0.00,completed
+T0003,C001,2026-09-26,transfer_out,Rent to Kiinteistö Oy Esimerkki,-850.00,0.00,pending
+T0004,C001,2026-09-27,card_payment,Spotify,-10.99,0.00,completed
+T0005,C002,2026-09-25,card_payment,Verkkokauppa.com,-129.90,0.00,completed
+T0006,C002,2026-09-25,card_payment,Verkkokauppa.com,-129.90,0.00,completed
+T0007,C002,2026-09-27,card_payment,Finnair,-212.00,0.00,declined
+T0008,C003,2026-09-21,top_up,Top-up by card,50.00,0.00,completed
+T0009,C003,2026-09-26,top_up,Top-up by card,200.00,0.00,reverted
+T0010,C003,2026-09-27,top_up,Top-up by bank transfer,300.00,0.00,pending
+T0011,C004,2026-09-19,cash_withdrawal,ATM Stockholm (SEK 1000),-88.40,2.00,completed
+T0012,C004,2026-09-19,card_payment,Restaurant Stockholm (SEK 450),-39.95,0.00,completed
+T0013,C004,2026-09-23,exchange,EUR to USD,-500.00,2.50,completed
+T0014,C005,2026-09-10,card_payment,Zalando,-89.95,0.00,completed
+T0015,C005,2026-09-15,card_payment,H&M Online,-45.00,0.00,completed
+T0016,C005,2026-09-26,transfer_in,Refund H&M Online,45.00,0.00,pending
+T0017,C006,2026-09-24,transfer_in,Transfer from private person,15000.00,0.00,completed
+T0018,C006,2026-09-25,transfer_out,International transfer,-9000.00,0.00,declined
+T0019,C007,2026-09-01,direct_debit,Elisa Oyj,-29.90,0.00,completed
+T0020,C007,2026-09-15,direct_debit,SmartFit Gym Ltd,-49.00,0.00,completed
+T0021,C007,2026-09-20,card_payment,Lidl,-34.15,0.00,completed
+T0022,C008,2026-09-27,cash_withdrawal,ATM Tampere,-100.00,0.00,pending
+T0023,C008,2026-09-26,card_payment,R-Kioski (virtual card),-6.50,0.00,completed
+T0024,C009,2026-09-20,transfer_in,Salary Helsingin kaupunki,3100.00,0.00,completed
+T0025,C009,2026-09-24,card_payment,Booking.com,-340.00,0.00,reverted
+T0026,C009,2026-09-25,transfer_out,Transfer to Matti Laine,-200.00,0.00,completed
+T0027,C010,2026-09-26,card_payment,S-Market,-18.20,0.00,declined
+T0028,C010,2026-09-27,transfer_out,Transfer to friend,-50.00,0.00,failed

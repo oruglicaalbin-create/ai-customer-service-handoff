@@ -4,6 +4,6 @@
   "test_messages": 3080,
   "accuracy": 0.8938,
   "macro_f1": 0.8942,
-  "train_seconds": 12.3,
+  "train_seconds": 12.5,
   "predict_ms_per_message": 0.016
 }

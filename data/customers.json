@@ -1,0 +1,12 @@
+[
+  {"customer_id": "C001", "name": "Aino Virtanen",   "email": "aino.v@example.com",   "language": "fi", "account_status": "active",     "identity_verified": true,  "balance_eur": 1243.50, "customer_since": "2021-03-14"},
+  {"customer_id": "C002", "name": "Mikko Korhonen",  "email": "mikko.k@example.com",  "language": "fi", "account_status": "active",     "identity_verified": true,  "balance_eur": 312.08,  "customer_since": "2019-11-02"},
+  {"customer_id": "C003", "name": "Laura Mäkinen",   "email": "laura.m@example.com",  "language": "en", "account_status": "active",     "identity_verified": false, "balance_eur": 50.00,   "customer_since": "2026-09-20"},
+  {"customer_id": "C004", "name": "Jussi Nieminen",  "email": "jussi.n@example.com",  "language": "fi", "account_status": "active",     "identity_verified": true,  "balance_eur": 2890.12, "customer_since": "2018-05-30"},
+  {"customer_id": "C005", "name": "Emma Lehtonen",   "email": "emma.l@example.com",   "language": "en", "account_status": "active",     "identity_verified": true,  "balance_eur": 87.40,   "customer_since": "2023-01-09"},
+  {"customer_id": "C006", "name": "Ville Heikkinen", "email": "ville.h@example.com",  "language": "fi", "account_status": "restricted", "identity_verified": true,  "balance_eur": 15020.00,"customer_since": "2025-12-01"},
+  {"customer_id": "C007", "name": "Sara Koskinen",   "email": "sara.k@example.com",   "language": "en", "account_status": "active",     "identity_verified": true,  "balance_eur": 640.75,  "customer_since": "2022-07-18"},
+  {"customer_id": "C008", "name": "Otto Järvinen",   "email": "otto.j@example.com",   "language": "fi", "account_status": "active",     "identity_verified": true,  "balance_eur": 158.90,  "customer_since": "2026-08-27"},
+  {"customer_id": "C009", "name": "Helmi Laine",     "email": "helmi.l@example.com",  "language": "en", "account_status": "active",     "identity_verified": true,  "balance_eur": 3301.66, "customer_since": "2020-02-11"},
+  {"customer_id": "C010", "name": "Eero Salminen",   "email": "eero.s@example.com",   "language": "fi", "account_status": "active",     "identity_verified": true,  "balance_eur": 24.10,   "customer_since": "2024-06-05"}
+]

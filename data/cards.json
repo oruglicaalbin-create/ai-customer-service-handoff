@@ -1,0 +1,15 @@
+[
+  {"card_id": "K101", "customer_id": "C001", "type": "physical",   "network": "visa",       "last4": "4821", "status": "active",        "expiry": "2028-04", "delivery_estimate": null},
+  {"card_id": "K102", "customer_id": "C001", "type": "virtual",    "network": "visa",       "last4": "7710", "status": "active",        "expiry": "2027-11", "delivery_estimate": null},
+  {"card_id": "K201", "customer_id": "C002", "type": "physical",   "network": "mastercard", "last4": "3092", "status": "active",        "expiry": "2026-10", "delivery_estimate": null},
+  {"card_id": "K301", "customer_id": "C003", "type": "physical",   "network": "visa",       "last4": "5563", "status": "not_activated", "expiry": "2031-09", "delivery_estimate": null},
+  {"card_id": "K401", "customer_id": "C004", "type": "physical",   "network": "mastercard", "last4": "1187", "status": "active",        "expiry": "2029-01", "delivery_estimate": null},
+  {"card_id": "K402", "customer_id": "C004", "type": "disposable", "network": "mastercard", "last4": "9034", "status": "expired",       "expiry": "2026-09", "delivery_estimate": null},
+  {"card_id": "K501", "customer_id": "C005", "type": "physical",   "network": "visa",       "last4": "2248", "status": "active",        "expiry": "2027-06", "delivery_estimate": null},
+  {"card_id": "K601", "customer_id": "C006", "type": "physical",   "network": "visa",       "last4": "6605", "status": "frozen",        "expiry": "2030-12", "delivery_estimate": null},
+  {"card_id": "K701", "customer_id": "C007", "type": "physical",   "network": "mastercard", "last4": "8472", "status": "active",        "expiry": "2028-08", "delivery_estimate": null},
+  {"card_id": "K801", "customer_id": "C008", "type": "physical",   "network": "visa",       "last4": "3319", "status": "in_delivery",   "expiry": "2031-08", "delivery_estimate": "2026-10-02"},
+  {"card_id": "K802", "customer_id": "C008", "type": "virtual",    "network": "visa",       "last4": "0457", "status": "active",        "expiry": "2031-08", "delivery_estimate": null},
+  {"card_id": "K901", "customer_id": "C009", "type": "physical",   "network": "mastercard", "last4": "7126", "status": "active",        "expiry": "2029-05", "delivery_estimate": null},
+  {"card_id": "K1001","customer_id": "C010", "type": "physical",   "network": "visa",       "last4": "5980", "status": "blocked_pin",   "expiry": "2028-02", "delivery_estimate": null}
+]
