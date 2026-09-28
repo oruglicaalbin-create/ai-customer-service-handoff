@@ -37,6 +37,9 @@ for triage and the LLM to draft replies and case summaries for human agents, not
 Assumed costs: **€30** for a wrong automated answer, **€300** for automating a message that must go to a human
 (a placeholder), **€5** for human handling. Sensitivity analyses for all of them are in the report.
 
+📄 **One-page business brief: [`report/brief.pdf`](report/brief.pdf)**, written for a bank's decision-makers
+(no technical background needed).
+
 📄 **Full explanation: [`report/report.pdf`](report/report.pdf)** (37 pages, every concept explained from
 scratch, including a revision log of what an internal review found wrong in the first version).
 
@@ -199,7 +202,7 @@ are free.
 | `src/reproduce.py` | runs all free steps in order |
 | `data/` | fake customers, cards, transactions and the bank's fact sheet (no real personal data) |
 | `results/` | committed predictions, LLM outputs, judge verdicts, metrics and charts |
-| `report/` | the full report (LaTeX source and PDF) |
+| `report/` | the full report and the one-page business brief (LaTeX sources and PDFs) |
 
 ## How it was built
 
