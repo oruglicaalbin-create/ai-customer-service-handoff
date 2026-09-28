@@ -72,6 +72,30 @@ def main():
     fig.tight_layout()
     fig.savefig(OUT_DIR / "confidence_hist.png", facecolor=SURFACE)
     plt.close(fig)
+    # --- Automation vs. safety leakage across thresholds (auto-send framing) ---
+    from threshold import arrays, leakage_curve
+    test_arr = arrays(baseline, "confidence", "predicted_intent", "correct")
+    grid = [round(x, 2) for x in np.arange(0.30, 0.96, 0.05)]
+    rows = pd.DataFrame(leakage_curve(*test_arr, grid))
+    fig, ax = plt.subplots(figsize=(7, 4.3), dpi=150, facecolor=SURFACE)
+    style(ax)
+    ax.fill_between(rows["automation_rate"] * 100, rows["leakage_rate"] * 100, rows["leakage_upper95"] * 100,
+                    color=BLUE, alpha=0.15, linewidth=0, label="up to one-sided 95% upper bound")
+    ax.plot(rows["automation_rate"] * 100, rows["leakage_rate"] * 100, color=BLUE, linewidth=2,
+            marker="o", markersize=6, markeredgecolor=SURFACE, markeredgewidth=1.5, label="observed leakage")
+    for _, r in rows.iterrows():
+        if r["threshold"] in (0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95):
+            ax.annotate(f"t={r['threshold']:.2f}", (r["automation_rate"] * 100, r["leakage_rate"] * 100),
+                        xytext=(4, 6), textcoords="offset points", fontsize=7, color=GRAY)
+    ax.set_xlabel("Messages automated (%)", color=INK)
+    ax.set_ylabel("Must-handoff messages automated (%)", color=INK)
+    ax.set_title("Automation vs. safety leakage (3,080 test msgs, 440 must-handoff)", color=INK,
+                 fontsize=10, loc="left")
+    ax.set_ylim(0, None)
+    ax.legend(frameon=False, fontsize=8, loc="upper left")
+    fig.tight_layout()
+    fig.savefig(OUT_DIR / "leakage.png", facecolor=SURFACE)
+    plt.close(fig)
     print(f"Saved figures to {OUT_DIR}")
 
 
