@@ -28,6 +28,10 @@ replies and case summaries for human agents. Don't let the LLM send replies on i
 | Classifier routes, LLM answers on its own (**measured**) | €5.1–6.0 |
 | Classifier routes, LLM drafts, a human reviews and sends (**measured drafts**) | €4.66–5.25 |
 
+The recommended design (a human reviews every AI draft) roughly breaks even with fully manual handling on these
+numbers (€4.66–5.25 vs. €5.00), before counting the time human agents save from the AI's case summaries and
+drafts, which this project did not measure.
+
 The € figures are business assumptions, not measurements: €5 for a message handled by a person, €30 for a
 wrong automated answer, and €300 for a sensitive case (fraud, dispute, money laundering) wrongly automated.
 The code also shows how the results change when these values change (`src/threshold.py`, `src/hybrid.py`;
@@ -85,7 +89,7 @@ Key design choices:
 
 ## Results
 
-The models were tested on BANKING77, a public set of 13,083 real banking questions labelled with 77 request
+The models were tested on BANKING77, a public dataset of 13,083 banking customer questions labelled with 77 request
 types (*intents*), with fictional customer data.
 
 ### 1. A classic classifier beats the LLM at recognising the request, on this benchmark
@@ -125,8 +129,8 @@ were observed (at most 0.7% with 95% confidence), but only 32% of messages are a
 ### 4. Measured end to end, reply quality decides
 
 The LLM was given the classifier's request type (correct 98% of the time) and wrote the replies. A second,
-stronger model (Claude Sonnet 5) then checked each reply against the customer's data and the fact sheet, and I
-reviewed its verdicts.
+stronger model (Claude Sonnet 5) then checked each reply against the customer's data and the fact sheet, and the
+verdicts were spot-checked.
 
 - **29 of 154 messages (19%)** were fully and correctly handled by the AI.
 - **7 of the 38 answers the AI sent (18%)** had real errors, such as top-up limits applied to disposable
@@ -154,7 +158,7 @@ correct replies).
 - **Benchmark mix.** The test set has exactly 40 messages per request type; a real inbox is dominated by a few
   types, so the savings figures do not transfer directly.
 - **Small samples and assumptions.** 154 messages for the LLM and 38 checked answers; all costs are
-  assumptions. The checking model makes mistakes in both directions, so its verdicts were reviewed by hand.
+  assumptions. The checking model makes mistakes in both directions, so its verdicts were spot-checked.
 
 ## How to run it
 
