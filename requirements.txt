@@ -1,4 +1,4 @@
-# Exact versions tested with Python 3.14.
+# Exact versions, tested with Python 3.11 and 3.14.
 anthropic==1.8.0        # Claude API client (LLM + tool use)
 python-dotenv==1.2.3    # loads the API key from .env
 pandas==3.0.6           # tables / data handling
