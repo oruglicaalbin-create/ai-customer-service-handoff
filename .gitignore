@@ -21,7 +21,14 @@ data/raw/
 .DS_Store
 Thumbs.db
 
+# --- Personal working files, kept locally only ---
+report/
+CLAUDE.md
+
 # --- LaTeX build byproducts ---
+docs/*.aux
+docs/*.log
+docs/*.out
 report/*.aux
 report/*.log
 report/*.toc

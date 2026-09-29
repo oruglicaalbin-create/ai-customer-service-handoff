@@ -1,4 +1,4 @@
-"""Reproduce every result in the README and report with one command. No API key, no cost.
+"""Reproduce every result in the README with one command. No API key, no cost.
 
 Run: python src/reproduce.py
 
@@ -8,7 +8,7 @@ Steps (about 6-8 minutes the first time, mostly cross-validation):
   3. threshold.py           routing cost, optimal threshold, safety curve, charts
   4. calibration_check.py   how the threshold depends on regularisation C
   5. hybrid.py analyse      measured end-to-end hybrid costs (reads saved replies and verdicts)
-  6. report_figures.py      extra figures for the report
+  6. report_figures.py      safety-leakage chart (and figures for the local report)
 
 The LLM runs themselves (run_agent.py, hybrid.py without "analyse") call the paid API;
 their outputs are committed in results/, so they are not needed to reproduce the numbers.

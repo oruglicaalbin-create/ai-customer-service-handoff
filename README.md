@@ -19,8 +19,7 @@ replies and case summaries for human agents. Don't let the LLM send replies on i
   confidence matches its real accuracy. For the same data it ranged from 0.39 to 0.875 depending on one model
   setting, so it has to be set on held-out data, not read off a formula.
 
-📄 **[One-page summary for business readers](report/brief.pdf)** · 📄 **[Full report](report/report.pdf)**
-(37 pages, every concept explained from scratch)
+📄 **[One-page summary for business readers](docs/brief.pdf)**
 
 | How messages are handled | Cost per message |
 |---|---|
@@ -31,8 +30,8 @@ replies and case summaries for human agents. Don't let the LLM send replies on i
 
 The € figures are business assumptions, not measurements: €5 for a message handled by a person, €30 for a
 wrong automated answer, and €300 for a sensitive case (fraud, dispute, money laundering) wrongly automated.
-The report shows how the results change when these values change. The $ figures further down are measured API
-prices.
+The code also shows how the results change when these values change (`src/threshold.py`, `src/hybrid.py`;
+numbers in `results/*.json`). The $ figures further down are measured API prices.
 
 ## The problem
 
@@ -118,7 +117,7 @@ Changing one regularisation setting makes the same classifier well calibrated an
 
 How many of the 440 test messages that must go to a human would be automated, for each threshold:
 
-![Automation vs. safety leakage](report/figures/leakage.png)
+![Automation vs. safety leakage](results/leakage.png)
 
 At 0.62, 5 of 440 (1.1%) slip through, which is not acceptable if replies are sent automatically. At 0.9 none
 were observed (at most 0.7% with 95% confidence), but only 32% of messages are automated.
@@ -138,7 +137,7 @@ reviewed its verdicts.
   by hand.
 
 An end-to-end test like this is what weakened my first, optimistic estimate (€2.39 per message, which assumed
-correct replies); the revision log in the report lists every change.
+correct replies).
 
 ## Limitations and risks
 
@@ -169,7 +168,7 @@ pip install -r requirements.txt
 
 (macOS/Linux: `python3 -m venv .venv`, `source .venv/bin/activate`.)
 
-**Reproduce every number in this README and the report, with one command. No API key, no cost:**
+**Reproduce every number in this README, with one command. No API key, no cost:**
 
 ```
 python src/reproduce.py
@@ -198,7 +197,7 @@ are free.
 | `src/reproduce.py` | runs all free steps in order |
 | `data/` | fake customers, cards, transactions and the bank's fact sheet (no real personal data) |
 | `results/` | committed predictions, LLM outputs, checking verdicts, metrics and charts |
-| `report/` | the full report and the one-page summary (LaTeX sources and PDFs) |
+| `docs/` | the one-page summary for business readers (LaTeX source and PDF) |
 
 ## How it was built
 

@@ -1,7 +1,8 @@
-"""Extra figures for the deep-dive report (report/). No API calls.
+"""Extra figures: calibration and confidence charts (for the local report), and the safety-leakage chart.
 
 Run: python src/report_figures.py
-Output: report/figures/reliability.png, report/figures/confidence_hist.png
+Output: results/leakage.png (used in the README); report/figures/reliability.png and
+        report/figures/confidence_hist.png (local report only, not in git)
 """
 from pathlib import Path
 
@@ -94,9 +95,9 @@ def main():
     ax.set_ylim(0, None)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
     fig.tight_layout()
-    fig.savefig(OUT_DIR / "leakage.png", facecolor=SURFACE)
+    fig.savefig(RESULTS_DIR / "leakage.png", facecolor=SURFACE)
     plt.close(fig)
-    print(f"Saved figures to {OUT_DIR}")
+    print(f"Saved figures to {OUT_DIR} and {RESULTS_DIR / 'leakage.png'}")
 
 
 if __name__ == "__main__":

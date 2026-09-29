@@ -1,0 +1,99 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[margin=1.6cm,top=1.3cm,bottom=1.3cm]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{eurosym}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,urlcolor=blue!50!black]{hyperref}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+\setlist{itemsep=0.1em,topsep=0.2em,leftmargin=1.2em}
+
+\definecolor{cblue}{HTML}{2A78D6}
+\definecolor{corange}{HTML}{EB6834}
+\definecolor{cgray}{HTML}{52514E}
+
+\newcommand{\head}[1]{\par\smallskip{\large\bfseries\color{cblue}#1}\par\vspace{0.15em}}
+\newtcolorbox{stat}{colback=cblue!5,colframe=cblue!60,boxrule=0.6pt,arc=2pt,left=4pt,right=4pt,top=3pt,bottom=3pt,
+  before upper=\raggedright}
+
+\begin{document}
+
+{\LARGE\bfseries AI in customer service: triage now, auto-replies later}\par
+\vspace{0.2em}
+{\color{cgray}Solution brief for a retail bank \textbullet{} Albin Oruglica \textbullet{} September 2026 \textbullet{}
+Based on a working prototype and 13{,}083 real banking questions}
+
+\head{The situation}
+A bank's service team answers thousands of short, often incomplete messages: \emph{``my card hasn't arrived''},
+\emph{``why was I charged twice?''}. Answering them needs information from several systems. An AI assistant could
+handle many of them instantly, but a confident wrong answer to a customer is costly, and some cases (suspected
+fraud, disputes, anti-money-laundering checks) must never be decided by a machine. The business question is
+\textbf{which messages AI should handle, and at what point it should bring in a human.}
+
+\head{What was built and tested}
+A prototype that reads each message, identifies the request, looks up the customer's (simulated) card,
+account and transaction data, and then answers, asks one clarifying question, or hands over to an agent with a
+case summary. It was tested on a public set of real banking questions, with fictional customer data. Two AI
+components were compared: a small, cheap \textbf{classifier} that sorts messages, and a \textbf{large language
+model} (Claude) that looks up data and writes replies.
+
+\head{Key findings}
+\begin{tcbraster}[raster columns=3,raster equal height,raster column skip=6pt]
+\begin{stat}\textbf{\large Sorting works.}\\ The classifier identified the customer's request correctly in
+\textbf{89\%} of cases, at practically zero cost, and knows when it is unsure.\end{stat}
+\begin{stat}\textbf{\large Safety is a setting.}\\ At a strict setting, \textbf{none of 440} fraud, dispute and
+money-laundering cases slipped past to automation; a looser setting automates more but lets about 1\% through.\end{stat}
+\begin{stat}\textbf{\large Replies are not ready.}\\ Even with the request correctly identified, the AI fully
+resolved only \textbf{1 in 5} messages, and about \textbf{1 in 5} of its answers contained an error.\end{stat}
+\end{tcbraster}
+
+\begin{itemize}
+  \item \textbf{Where the value is.} Sorting messages and routing them to the right place could be worth up to about
+  \textbf{\euro2--2.5 per message} against today's fully manual handling (assumed \euro5 per message). This is a ceiling:
+  it assumes every sorted message then gets a correct reply.
+  \item \textbf{Why not let the AI reply on its own.} When the AI's own replies were checked end to end, the fully
+  automated system cost about the same as, or slightly more than, human-only handling (\euro5.1--6.0 vs.\ \euro5.00
+  per message). The errors were plausible-sounding: a real rule applied to the wrong product, an invented policy.
+  Simple automatic checks do not catch them.
+  \item \textbf{The right threshold depends on the bank's own costs} (what a wrong answer and an agent's time really
+  cost, and how much risk is acceptable), and it must be re-measured whenever the model changes. It cannot be set
+  once from a formula.
+\end{itemize}
+
+\head{Recommendation}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries\color{cblue}}p{2.6cm}X@{}}
+Phase 1: now & \textbf{AI triage and drafting, humans send.} The classifier sorts every message and routes
+fraud, dispute and anti-money-laundering cases straight to specialists. For the rest, the AI prepares a draft
+reply and a case summary, and the agent reviews, edits and sends. Low risk; no AI text reaches a customer
+unchecked.\\[0.3em]
+Phase 2: later & \textbf{Auto-send for a narrow set of simple requests}, only once measured reply accuracy on the
+bank's own data beats the break-even (roughly fewer than 1 wrong answer in 6 at these costs), backed by a proper
+knowledge base of products and procedures, and with the strict safety setting.\\
+\end{tabularx}
+
+\textbf{Controls from day one:} fixed, auditable rules for cases AI must never decide; monitoring of how many
+sensitive cases the sorting lets through; the AI sees only the customer data it needs; a data-processing
+agreement and legal basis for any external AI service (GDPR), or an in-house model if data must stay internal.
+
+\head{Proposed next step: a 6-week pilot with one service team}
+Run Phase 1 on live traffic and measure what the prototype could not: \textbf{agent handling time with and
+without AI drafts}, the share of drafts sent unchanged, sorting accuracy on the bank's real mix of requests, and
+the number of sensitive cases misrouted. These four numbers decide whether Phase 1 pays for itself and when Phase 2
+is justified.
+
+\vfill
+{\footnotesize\color{cgray} Evidence: prototype, code and all results in the project repository (see its README;
+every number can be reproduced with one command). Tested on the public BANKING77 dataset (PolyAI, CC BY 4.0) with invented customer
+data and an 11-line fictional product fact sheet; results are indicative, not a forecast for a specific bank. Cost
+figures use assumptions (\euro5 per manual message, \euro30 per wrong answer, \euro300 per misrouted sensitive
+case) and are tested for sensitivity in the repository.}
+
+\end{document}
