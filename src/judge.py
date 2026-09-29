@@ -81,16 +81,27 @@ def _case(message, customer_id, dataset_label, decision, reply) -> dict:
             "decision": decision, "reply": reply}
 
 
+def _read_cache(cache_file: Path) -> dict | None:
+    """A cached verdict, or None if missing or graded against different customer data."""
+    if not cache_file.exists():
+        return None
+    verdict = json.loads(cache_file.read_text(encoding="utf-8"))
+    if verdict.get("data_version") != systems.DATA_VERSION:
+        return None  # stale: the judge saw customer data that has since changed
+    return {**verdict, "from_cache": True}
+
+
 def is_judged(message, customer_id, dataset_label, decision, reply) -> bool:
-    return _cache_file(_case(message, customer_id, dataset_label, decision, reply)).exists()
+    return _read_cache(_cache_file(_case(message, customer_id, dataset_label, decision, reply))) is not None
 
 
 def judge_reply(message, customer_id, dataset_label, decision, reply) -> dict:
     global _client
     case = _case(message, customer_id, dataset_label, decision, reply)
     cache_file = _cache_file(case)
-    if cache_file.exists():
-        return {**json.loads(cache_file.read_text(encoding="utf-8")), "from_cache": True}
+    cached = _read_cache(cache_file)
+    if cached is not None:
+        return cached
 
     if _client is None:
         _client = anthropic.Anthropic()
@@ -112,6 +123,7 @@ def judge_reply(message, customer_id, dataset_label, decision, reply) -> dict:
     verdict["cost_usd"] = round(response.usage.input_tokens * PRICE_PER_TOKEN_USD["input"]
                                 + response.usage.output_tokens * PRICE_PER_TOKEN_USD["output"], 6)
     verdict["judge_version"] = JUDGE_VERSION
+    verdict["data_version"] = systems.DATA_VERSION
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_file.write_text(json.dumps(verdict, indent=2, ensure_ascii=False), encoding="utf-8")
     return {**verdict, "from_cache": False}

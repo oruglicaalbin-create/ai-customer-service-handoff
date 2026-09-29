@@ -42,7 +42,11 @@ C1 = 30.0          # € a wrong automated answer (assumption, agreed with the b
 C1_SAFETY = 300.0  # € a must-handoff message (fraud/dispute/AML) that gets automated (assumption)
 C2 = 5.0           # € a human handling the message (assumption)
 C_AUTO = 0.01      # € API cost of an automated reply (measured ~$0.008 per message)
-THRESHOLDS = np.round(np.arange(0, 1.0001, 0.005), 3)
+# Candidate thresholds 0, 0.005, ..., 1, plus one above 1: "send everything to a human".
+# (A message is automated when confidence >= t, so a confidence of exactly 1.0 would otherwise
+# never reach a human, and the all-human option would be missing from the search.)
+ALL_TO_HUMAN = 1.001
+THRESHOLDS = np.append(np.round(np.arange(0, 1.0001, 0.005), 3), ALL_TO_HUMAN)
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"

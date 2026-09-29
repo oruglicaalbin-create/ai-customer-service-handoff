@@ -22,13 +22,20 @@ _TRANSACTIONS = pd.read_csv(DATA_DIR / "transactions.csv")
 _CAP = r"[A-Z][a-zA-Z]*(?: [A-Z][a-zA-Z]*)*"  # Capitalised words, e.g. "Unblock PIN"
 
 
+_THOUSANDS = r"\d{1,3}(?:(?:,\d{3})+(?:\.\d+)?|(?: \d{3})+(?:,\d+)?)(?!\d)"  # 1,243.50 or 1 243,50
+
+
 def numbers(text: str) -> set[str]:
-    """All numbers in a text, normalised: '10,000' and '10 000' -> '10000', '129,90' -> '129.9'."""
-    found = re.findall(r"\d{1,3}(?:[, ]\d{3})+(?![\d,.])|\d+(?:[.,]\d+)?", str(text))
+    """All numbers in a text, normalised: '10,000', '10 000' -> '10000'; '1,243.50', '1 243,50' -> '1243.5';
+    '129,90' -> '129.9'."""
+    found = re.findall(rf"{_THOUSANDS}|\d+(?:[.,]\d+)?", str(text))
     normalised = set()
     for x in found:
-        if re.fullmatch(r"\d{1,3}(?:[, ]\d{3})+", x):
-            x = x.replace(",", "").replace(" ", "")  # thousands separators
+        if re.fullmatch(_THOUSANDS, x):
+            if " " in x:  # Finnish style: space groups, comma decimal
+                x = x.replace(" ", "").replace(",", ".")
+            else:         # English style: comma groups, point decimal
+                x = x.replace(",", "")
         normalised.add(str(float(x.replace(",", "."))).rstrip("0").rstrip("."))
     return normalised
 

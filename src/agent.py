@@ -144,12 +144,9 @@ PROMPT_VERSION = hashlib.sha256(
     json.dumps([MODEL, SYSTEM_PROMPT, TOOLS, OUTPUT_SCHEMA], sort_keys=True).encode()
 ).hexdigest()[:12]
 
-# The simulated systems' data. Each cached result records the version it was made
-# with; a result made with different data is treated as stale and recomputed.
-DATA_VERSION = hashlib.sha256(b"".join(
-    (Path(__file__).resolve().parent.parent / "data" / f).read_bytes()
-    for f in ["customers.json", "cards.json", "transactions.csv"]
-)).hexdigest()[:12]
+# The simulated systems' data version (see systems.py). Each cached result records it;
+# a result made with different data is treated as stale and recomputed.
+DATA_VERSION = systems.DATA_VERSION
 
 # --- Hybrid mode: the classifier supplies the intent, the LLM gathers data and replies.
 # The rules are the frozen prompt's rules word for word; only the intent part differs.

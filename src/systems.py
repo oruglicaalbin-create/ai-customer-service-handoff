@@ -9,12 +9,19 @@ Every function returns plain dicts/lists (easy to turn into JSON for the LLM)
 and returns {"error": ...} instead of crashing, so the assistant can react to
 a missing customer the way a human agent would.
 """
+import hashlib
 import json
 from pathlib import Path
 
 import pandas as pd
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+# Fingerprint of the simulated systems' data. Cached LLM answers and judge verdicts record it,
+# and anything made with different data is treated as stale.
+DATA_VERSION = hashlib.sha256(b"".join(
+    (DATA_DIR / f).read_bytes() for f in ["customers.json", "cards.json", "transactions.csv"]
+)).hexdigest()[:12]
 
 
 def _load_json(filename: str) -> list[dict]:
